@@ -63,7 +63,7 @@ runs:
       run: |
         echo "BUILD_TYPE=prod" >> $GITHUB_ENV
         echo "SLACK_MESSAGE=${{ github.event.repository.name }} ${{ steps.package-version.outputs.current-version }} released to PROD" >> $GITHUB_ENV
-        echo "INSTANCES=${{ inputs.instances_prod }}" >> $GITHUB_ENV
+        echo "INSTANCES=${{ inputs.instances-prod }}" >> $GITHUB_ENV
 
     - name: Set DEV env
       shell: bash
@@ -71,7 +71,7 @@ runs:
       run: |
         echo "BUILD_TYPE=dev" >> $GITHUB_ENV
         echo "SLACK_MESSAGE=${{ github.event.repository.name }} ${{ steps.package-version.outputs.current-version }} released to DEV" >> $GITHUB_ENV
-        echo "INSTANCES=${{ inputs.instances_dev }}" >> $GITHUB_ENV
+        echo "INSTANCES=${{ inputs.instances-dev }}" >> $GITHUB_ENV
 
     - name: Set values
       id: values
