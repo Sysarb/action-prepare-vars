@@ -1,5 +1,15 @@
 name: 'Prepare variables'
 description: 'Prepare variables for micro service deployment'
+
+inputs:
+  instances-prod:
+    description: 'Production instances'
+    required: true
+
+  instances-dev:
+    description: 'Development instances'
+    required: true
+
 outputs:
   version:
     description: "Package version"
@@ -53,7 +63,7 @@ runs:
       run: |
         echo "BUILD_TYPE=prod" >> $GITHUB_ENV
         echo "SLACK_MESSAGE=${{ github.event.repository.name }} ${{ steps.package-version.outputs.current-version }} released to PROD" >> $GITHUB_ENV
-        echo "INSTANCES=${{ secrets.INSTANCES_PROD }}" >> $GITHUB_ENV
+        echo "INSTANCES=${{ inputs.instances_prod }}" >> $GITHUB_ENV
 
     - name: Set DEV env
       shell: bash
@@ -61,7 +71,7 @@ runs:
       run: |
         echo "BUILD_TYPE=dev" >> $GITHUB_ENV
         echo "SLACK_MESSAGE=${{ github.event.repository.name }} ${{ steps.package-version.outputs.current-version }} released to DEV" >> $GITHUB_ENV
-        echo "INSTANCES=${{ secrets.INSTANCES_DEV }}" >> $GITHUB_ENV
+        echo "INSTANCES=${{ inputs.instances_dev }}" >> $GITHUB_ENV
 
     - name: Set values
       id: values
