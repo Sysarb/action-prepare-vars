@@ -1,0 +1,82 @@
+name: 'Prepare variables'
+description: 'Prepare variables for micro service deployment'
+inputs:
+  name:
+    description: 'Name of the micro service'
+    required: true
+
+  token:
+    description: 'GitHub token'
+    required: true
+
+outputs:
+  version:
+    description: "Package version"
+    value: ${{ steps.values.outputs.version }}
+
+  instances:
+    description: "Service instances"
+    value: ${{ steps.values.outputs.instances }}
+
+  build:
+    description: "Build type"
+    value: ${{ steps.values.outputs.build }}
+
+  slack:
+    description: "Slack message"
+    value: ${{ steps.values.outputs.slack }}
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-node@v2
+      with:
+        node-version: '16'
+
+    - name: Prepare version for PROD
+      shell: bash
+      if: "!github.event.release.prerelease"
+      run: |
+        npm version ${GITHUB_REF/refs\/tags\//} --no-git-tag-version
+
+    - name: Prepare version for DEV
+      shell: bash
+      if: "github.event.release.prerelease"
+      run: |
+        npm version ${GITHUB_REF/refs\/tags\//}-rc${{github.run_number}} --no-git-tag-version
+
+    - name: Get version
+      if: "github.event.release.prerelease"
+      id: package-version
+      uses: martinbeentjes/npm-get-version-action@master
+
+    - name: Lower case image name
+      id: string
+      uses: ASzc/change-string-case-action@v1
+      with:
+        string: ${{ github.repository }}
+
+    - name: Set PROD env
+      shell: bash
+      if: "!github.event.release.prerelease"
+      run: |
+        echo "BUILD_TYPE=prod" >> $GITHUB_ENV
+        echo "SLACK_MESSAGE=${{ github.event.repository.name }} ${{ steps.package-version.outputs.current-version }} released to PROD" >> $GITHUB_ENV
+        echo "INSTANCES=${{ secrets.INSTANCES_PROD }}" >> $GITHUB_ENV
+
+    - name: Set DEV env
+      shell: bash
+      if: "github.event.release.prerelease"
+      run: |
+        echo "BUILD_TYPE=dev" >> $GITHUB_ENV
+        echo "SLACK_MESSAGE=${{ github.event.repository.name }} ${{ steps.package-version.outputs.current-version }} released to DEV" >> $GITHUB_ENV
+        echo "INSTANCES=${{ secrets.INSTANCES_DEV }}" >> $GITHUB_ENV
+
+    - name: Set values
+      id: values
+      shell: bash
+      run: |
+        run: echo "::set-output name=version::${{ steps.package-version.outputs.current-version }}"
+        run: echo "::set-output name=instances::${{ env.INSTANCES }}"
+        run: echo "::set-output name=build::${{ env.BUILD_TYPE }}"
+        run: echo "::set-output name=slack::${{ env.SLACK_MESSAGE }}"
