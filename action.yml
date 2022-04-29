@@ -1,14 +1,5 @@
 name: 'Prepare variables'
 description: 'Prepare variables for micro service deployment'
-inputs:
-  name:
-    description: 'Name of the micro service'
-    required: true
-
-  token:
-    description: 'GitHub token'
-    required: true
-
 outputs:
   version:
     description: "Package version"
@@ -76,6 +67,7 @@ runs:
       id: values
       shell: bash
       run: |
+        run: echo "::set-output name=versinameon::${{ steps.string.outputs.lowercase }}"
         run: echo "::set-output name=version::${{ steps.package-version.outputs.current-version }}"
         run: echo "::set-output name=instances::${{ env.INSTANCES }}"
         run: echo "::set-output name=build::${{ env.BUILD_TYPE }}"
