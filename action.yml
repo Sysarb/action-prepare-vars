@@ -77,8 +77,8 @@ runs:
       id: values
       shell: bash
       run: |
-        run: echo "::set-output name=name::$(echo ${{ steps.string.outputs.lowercase }})"
-        run: echo "::set-output name=version::$(echo ${{ steps.package-version.outputs.current-version }})"
-        run: echo "::set-output name=instances::$(echo ${{ env.INSTANCES }})"
-        run: echo "::set-output name=build::$(echo ${{ env.BUILD_TYPE }})"
-        run: echo "::set-output name=slack::$(echo ${{ env.SLACK_MESSAGE }})"
+        echo "::set-output name=name::${{ steps.string.outputs.lowercase }}"
+        echo "::set-output name=version::${{ steps.package-version.outputs.current-version }}"
+        echo "::set-output name=instances::${{ env.INSTANCES }}"
+        echo "::set-output name=build::${{ env.BUILD_TYPE }}"
+        echo "::set-output name=slack::${{ env.SLACK_MESSAGE }}"
