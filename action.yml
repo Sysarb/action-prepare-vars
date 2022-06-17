@@ -27,6 +27,10 @@ outputs:
     description: "Slack message"
     value: ${{ steps.values.outputs.slack }}
 
+  name:
+    description: "Package name"
+    value: ${{ steps.values.outputs.name }}
+
 runs:
   using: "composite"
   steps:
