@@ -95,7 +95,7 @@ runs:
       id: values
       shell: bash
       run: |
-        echo "::set-output name=name::${{ ${{ steps.replace.outputs.value }} }}"
+        echo "::set-output name=name::${{ steps.replace.outputs.value }}"
         echo "::set-output name=repository::${{ steps.lower.outputs.lowercase }}"
         echo "::set-output name=version::${{ env.VERSION }}"
         echo "::set-output name=instances::${{ env.INSTANCES }}"
