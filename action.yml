@@ -72,7 +72,7 @@ runs:
       uses: mad9000/actions-find-and-replace-string@2
       with:
           source: ${{ inputs.name }}
-          find: 'Sysarb/'
+          find: 'sysarb/'
           replace: ''
 
     - name: Set PROD env
