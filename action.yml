@@ -31,10 +31,15 @@ outputs:
     description: "Package name"
     value: ${{ steps.values.outputs.name }}
 
+  repository:
+    description: "Package repository"
+    value: ${{ steps.values.outputs.repository }}
+
 runs:
   using: "composite"
   steps:
-    - uses: actions/setup-node@v2
+    - name: Install node
+      uses: actions/setup-node@v2
       with:
         node-version: '16'
 
@@ -42,28 +47,40 @@ runs:
       shell: bash
       if: "!github.event.release.prerelease"
       run: |
-        npm version ${GITHUB_REF/refs\/tags\//} --no-git-tag-version
         echo "VERSION=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_ENV
 
     - name: Prepare version for DEV
       shell: bash
       if: "github.event.release.prerelease"
       run: |
-        npm version ${GITHUB_REF/refs\/tags\//}-rc${{github.run_number}} --no-git-tag-version
         echo "VERSION=${GITHUB_REF/refs\/tags\//}-rc${{github.run_number}}" >> $GITHUB_ENV
 
+    - name: Set NPM version
+      shell: bash
+      if: "github.event.release.prerelease"
+      run: |
+        npm version ${{ env.VERSION }} --no-git-tag-version
+
     - name: Lower case image name
-      id: string
+      id: lower
       uses: ASzc/change-string-case-action@v1
       with:
         string: ${{ github.repository }}
+
+    - name: Get service name without owner
+      id: replace
+      uses: mad9000/actions-find-and-replace-string@2
+      with:
+          source: ${{ inputs.name }}
+          find: 'Sysarb/'
+          replace: ''
 
     - name: Set PROD env
       shell: bash
       if: "!github.event.release.prerelease"
       run: |
         echo "BUILD_TYPE=prod" >> $GITHUB_ENV
-        echo "SLACK_MESSAGE=${{ github.event.repository.name }} ${{ steps.package-version.outputs.current-version }} released to PROD" >> $GITHUB_ENV
+        echo "SLACK_MESSAGE=${{ github.event.repository.name }} ${{ env.VERSION}} released to PROD" >> $GITHUB_ENV
         echo "INSTANCES=${{ inputs.instances-prod }}" >> $GITHUB_ENV
 
     - name: Set DEV env
@@ -71,14 +88,15 @@ runs:
       if: "github.event.release.prerelease"
       run: |
         echo "BUILD_TYPE=dev" >> $GITHUB_ENV
-        echo "SLACK_MESSAGE=${{ github.event.repository.name }} ${{ steps.package-version.outputs.current-version }} released to DEV" >> $GITHUB_ENV
+        echo "SLACK_MESSAGE=${{ github.event.repository.name }} ${{ env.VERSION }} released to DEV" >> $GITHUB_ENV
         echo "INSTANCES=${{ inputs.instances-dev }}" >> $GITHUB_ENV
 
     - name: Set values
       id: values
       shell: bash
       run: |
-        echo "::set-output name=name::${{ steps.string.outputs.lowercase }}"
+        echo "::set-output name=name::${{ ${{ steps.replace.outputs.value }} }}"
+        echo "::set-output name=repository::${{ steps.lower.outputs.lowercase }}"
         echo "::set-output name=version::${{ env.VERSION }}"
         echo "::set-output name=instances::${{ env.INSTANCES }}"
         echo "::set-output name=build::${{ env.BUILD_TYPE }}"
