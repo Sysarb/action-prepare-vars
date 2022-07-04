@@ -71,7 +71,7 @@ runs:
       id: replace
       uses: mad9000/actions-find-and-replace-string@2
       with:
-          source: ${{ inputs.name }}
+          source: ${{ steps.lower.outputs.lowercase }}
           find: 'sysarb/'
           replace: ''
 
