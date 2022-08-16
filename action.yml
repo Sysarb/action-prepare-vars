@@ -120,7 +120,9 @@ runs:
     - name: Get Cloudflare variables
       shell: bash
       run: |
-        echo "CLOUDFLARE_HOST=$(grep -s -A0 'host:' ./manifests/ingress.yaml | tail -n1 | awk '{ gsub(\\"\\[TOP_DOMAIN\\]\", \\"${{ env.TOP_DOMAIN }}\\", $3); print $3 }'" >> $GITHUB_ENV
+        HOST_ORG=$(grep -s -A0 'host:' ./manifests/ingress.yaml | tail -n1 | awk '{ print $3 }'
+        HOST=$(echo $HOST_ORG | sed 's|\[TOP_DOMAIN\]|${{ env.TOP_DOMAIN }}')
+        echo "CLOUDFLARE_HOST=${HOST}" >> $GITHUB_ENV
 
     - name: Set values
       id: values
