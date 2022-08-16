@@ -35,6 +35,10 @@ outputs:
     description: "Package repository"
     value: ${{ steps.values.outputs.repository }}
 
+  hostname:
+    description: "Hostname"
+    value: ${{ steps.values.outputs.hostname }}
+
 runs:
   using: "composite"
   steps:
@@ -82,6 +86,7 @@ runs:
         echo "BUILD_TYPE=prod" >> $GITHUB_ENV
         echo "SLACK_MESSAGE=${{ github.event.repository.name }} ${{ env.VERSION}} released to PROD" >> $GITHUB_ENV
         echo "INSTANCES=${{ inputs.instances-prod }}" >> $GITHUB_ENV
+        echo "TOP_DOMAIN=app" >> $GITHUB_ENV
 
     - name: Set DEV env
       shell: bash
@@ -90,6 +95,12 @@ runs:
         echo "BUILD_TYPE=dev" >> $GITHUB_ENV
         echo "SLACK_MESSAGE=${{ github.event.repository.name }} ${{ env.VERSION }} released to DEV" >> $GITHUB_ENV
         echo "INSTANCES=${{ inputs.instances-dev }}" >> $GITHUB_ENV
+        echo "TOP_DOMAIN=dev" >> $GITHUB_ENV
+
+    - name: Get hostname
+      shell: bash
+      run: |
+        echo "CLOUDFLARE_HOST=$(grep -s -A0 'host:' ./manifests/ingress.yaml | tail -n1 | awk '{ gsub("\\[TOP_DOMAIN\\]", "${{ env.TOP_DOMAIN }}", $3); print $3 }'" >> $GITHUB_ENV
 
     - name: Set values
       id: values
@@ -101,3 +112,4 @@ runs:
         echo "::set-output name=instances::${{ env.INSTANCES }}"
         echo "::set-output name=build::${{ env.BUILD_TYPE }}"
         echo "::set-output name=slack::${{ env.SLACK_MESSAGE }}"
+        echo "::set-output name=hostname::${{ env.CLOUDFLARE_HOST }}"
