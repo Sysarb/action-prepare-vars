@@ -119,6 +119,7 @@ runs:
 
     - name: Get Cloudflare variables
       shell: bash
+      continue-on-error: true
       run: |
         HOST_ORG=$(grep -s -A0 'host:' ./manifests/ingress.yaml | tail -n1 | awk '{ print $3 }')
         HOST=$(echo $HOST_ORG | sed 's|\[TOP_DOMAIN\]|${{ env.TOP_DOMAIN }}|g')
